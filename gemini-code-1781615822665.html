@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard: Real-Time Quality Monitoring in GMAW</title>
+    <!-- Memuatkan Chart.js untuk graf interaktif -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #1a365d;
+            --secondary: #2b6cb0;
+            --accent: #e2e8f0;
+            --text-main: #2d3748;
+            --bg-color: #f7fafc;
+            --info-bg: #ebf8ff;
+            --danger: #e53e3e;
+            --success: #38a169;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        .header {
+            background-color: var(--primary);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+
+        .header p {
+            margin: 5px 0;
+            font-size: 16px;
+            color: #cbd5e0;
+        }
+
+        /* Butang Info Interaktif */
+        .info-btn {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background-color 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+        }
+
+        .info-btn:hover {
+            background-color: #2b6cb0;
+        }
+
+        /* Panel Info Beranimasi */
+        .info-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease;
+            background-color: var(--info-bg);
+            color: var(--text-main);
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: left;
+            font-size: 15px;
+        }
+
+        .info-panel.show {
+            max-height: 500px; 
+            padding: 20px;
+            border-left: 5px solid #3182ce;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Team Members Styles */
+        .section-title {
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--primary);
+            margin-top: 40px;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .team-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--secondary);
+            transition: transform 0.3s ease;
+        }
+
+        .team-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .team-card img {
+            width: 100px;
+            height: 100px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            margin-bottom: 15px;
+            object-fit: cover;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #718096;
+            font-size: 12px;
+        }
+
+        .team-card h3 { margin: 0 0 5px 0; color: var(--primary); font-size: 18px; }
+        .team-card h4 { margin: 0 0 15px 0; color: #718096; font-size: 14px; }
+        .team-card p { font-size: 13px; text-align: left; line-height: 1.5; }
+
+        /* Table Styles */
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 40px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid var(--accent);
+        }
+
+        th {
+            background-color: var(--primary);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:nth-child(even) { background-color: #f8fafc; }
+        tr:hover { background-color: #ebf8ff; }
+
+        /* Chart & Card Styles */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+
+        .analysis-text {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--bg-color);
+            border-left: 4px solid var(--secondary);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .analysis-text.alert {
+            border-left: 4px solid var(--danger);
+            background-color: #fff5f5;
+        }
+
+        ul { margin-top: 10px; padding-left: 20px; }
+        li { margin-bottom: 8px; }
+
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- HEADER -->
+    <div class="header">
+        <h1>Real-Time Quality Monitoring in GMAW</h1>
+        <p>using Clamp Meter, Thermal Imaging, and Load/Displacement Sensors</p>
+        <p><strong>Date:</strong> 19/06/2026</p>
+        
+        <!-- Butang Info Interaktif -->
+        <button class="info-btn" onclick="toggleInfo()">
+            <span id="infoIcon">➕</span> Klik untuk Info Tugasan
+        </button>
+
+        <!-- Panel Info yang akan expand/collapse -->
+        <div id="infoPanel" class="info-panel">
+            <h3 style="margin-top:0; color: #2b6cb0;">Senario & Objektif Projek</h3>
+            <p><strong>Senario:</strong> Syarikat kimpalan anda telah mendapat kontrak untuk menghasilkan 500 komponen struktur kritikal menggunakan kaedah <em>Gas Metal Arc Welding (GMAW)</em>[cite: 2].</p>
+            <p><strong>Objektif:</strong> Sebagai Pasukan Jaminan Kualiti (QA), anda ditugaskan untuk mengumpul, menganalisis, dan membentangkan data kepada pengurus pengeluaran menggunakan dashboard interaktif ini bagi memastikan setiap kimpalan memenuhi kriteria penembusan, input haba, dan integriti struktur yang ketat[cite: 2].</p>
+        </div>
+    </div>
+
+    <!-- GROUP MEMBERS -->
+    <h2 class="section-title">Quality Assurance Team</h2>
+    <div class="team-grid">
+        <div class="team-card">
+            <img src="image_844f3f.png" alt="Gambar Clarren">
+            <h3>Clarren Leo Anak Chan</h3>
+            <h4>Electrical Engineer</h4>
+            <p><strong>Responsibility:</strong> Clamp meter measurement, power/heat input calculation, scatter diagrams[cite: 2].</p>
+        </div>
+        <div class="team-card">
+            <img src="" alt="Gambar Danny">
+            <h3>Ahmad Danny Islafh</h3>
+            <h4>Thermal Analyst</h4>
+            <p><strong>Responsibility:</strong> Thermal camera operation, control chart (X-bar & R) for temperature stability[cite: 2].</p>
+        </div>
+        <div class="team-card">
+            <img src="" alt="Gambar Hazim">
+            <h3>Muhammad Hazim</h3>
+            <h4>Mechanical Analyst</h4>
+            <p><strong>Responsibility:</strong> Load (arc analyzer) & displacement (LVDT) measurement, comparison table[cite: 2].</p>
+        </div>
+        <div class="team-card">
+            <img src="" alt="Gambar Syed">
+            <h3>Muhhamad Syed Fakhrul</h3>
+            <h4>Data Dashboard Designer</h4>
+            <p><strong>Responsibility:</strong> Compile all data into interactive HTML dashboard, ensure visualization clarity[cite: 2].</p>
+        </div>
+    </div>
+
+    <!-- TABLE 1: 30 SAMPLES ELECTRICAL DATA -->
+    <h2 class="section-title">Table 1: 30 Samples Electrical Measurement Parameters</h2>
+    <div class="table-container">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Sample</th>
+                    <th>Current (A)</th>
+                    <th>Voltage (V)</th>
+                    <th>Power (W)</th>
+                    <th>Heat Input (kJ/mm)</th>
+                    <th>Resistance (Ω)</th>
+                    <th>Voltage Drop (V)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data dimasukkan secara automatik menggunakan JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ELECTRICAL SCATTER DIAGRAMS (PLOT A, B, C) -->
+    <h2 class="section-title">Electrical Scatter Diagrams & Analysis</h2>
+    <div class="grid-2">
+        <div class="chart-card">
+            <h3>Plot A: Current vs Voltage</h3>
+            <div class="chart-wrapper"><canvas id="plotA"></canvas></div>
+            <div class="analysis-text">
+                <strong>Analysis:</strong> Positive correlation. As the current increases, the welding machine automatically increases the voltage to maintain a consistent arc length[cite: 2].
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3>Plot B: Current vs Power</h3>
+            <div class="chart-wrapper"><canvas id="plotB"></canvas></div>
+            <div class="analysis-text">
+                <strong>Analysis:</strong> Strong positive linear correlation. Total welding power surges significantly as both increase[cite: 2]. 
+            </div>
+        </div>
+
+        <div class="chart-card" style="grid-column: 1 / -1;">
+            <h3>Plot C: Current vs Heat Input</h3>
+            <div class="chart-wrapper"><canvas id="plotC"></canvas></div>
+            <div class="analysis-text">
+                <strong>Analysis:</strong> Positive correlation. Sufficient heat produces deep penetration. However, excessive heat widens the Heat-Affected Zone (HAZ), makes the metal brittle, and causes distortion[cite: 2].
+            </div>
+        </div>
+    </div>
+
+    <!-- STATISTICAL PROCESS CONTROL (SPC) CHART -->
+    <h2 class="section-title">Statistical Process Control (Thermal Analysis)</h2>
+    <div class="chart-card">
+        <h3>X-Bar Control Chart for Temperature Stability</h3>
+        <div class="chart-wrapper" style="height: 400px;">
+            <canvas id="spcChart"></canvas>
+        </div>
+        <div class="analysis-text alert">
+            <strong>Control Chart Interpretation:</strong>
+            <ul>
+                <li>The vast majority of the sample means (23 points) deviate beyond the acceptable statistical thermal boundaries[cite: 2].</li>
+                <li>Although the R-chart shows intra-sample stability, the X-bar chart reveals severe inter-sample instability[cite: 2].</li>
+                <li>The overall heat input across the production run is highly erratic and unpredictable due to erratic wire feed speed causing arc current fluctuations[cite: 2].</li>
+                <li><strong>Corrective Action:</strong> Inspect and calibrate the wire feeder drive rolls and replace the worn contact tip[cite: 2].</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- LOAD & DISPLACEMENT (MECHANICAL ANALYSIS) -->
+    <h2 class="section-title">Load & Displacement (Mechanical Analysis)</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Arc Welding Analyzer (Load)</th>
+                    <th>LVDT (Displacement)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>Measured Parameter</strong></td><td>Load / Force[cite: 2]</td><td>Linear displacement[cite: 2]</td></tr>
+                <tr><td><strong>Operating Principle</strong></td><td>Electrical signal analysis from load sensor[cite: 2]</td><td>Electromagnetic induction[cite: 2]</td></tr>
+                <tr><td><strong>Typical Range</strong></td><td>Tens to hundreds of Newtons[cite: 2]</td><td>Micrometer to millimeter[cite: 2]</td></tr>
+                <tr><td><strong>Accuracy / Precision</strong></td><td>High[cite: 2]</td><td>Very high[cite: 2]</td></tr>
+                <tr><td><strong>Application in GMAW</strong></td><td>Monitor welding force/load[cite: 2]</td><td>Monitor movement and distortion[cite: 2]</td></tr>
+                <tr><td><strong>Data Output Format</strong></td><td>Force (N)[cite: 2]</td><td>Displacement (mm)[cite: 2]</td></tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="grid-2">
+        <div class="chart-card">
+            <h3 style="color: var(--danger)">Maximum Load</h3>
+            <p style="font-size: 32px; font-weight: bold; margin: 10px 0; color: var(--danger)">145 N</p>
+            <p>The maximum load recorded was 145 N, occurring precisely at 15 seconds[cite: 2]. This peak load is the direct result of intense localized thermal expansion, which generates high internal stress within the metal during the welding process[cite: 2].</p>
+        </div>
+        <div class="chart-card">
+            <h3 style="color: var(--secondary)">Maximum Displacement</h3>
+            <p style="font-size: 32px; font-weight: bold; margin: 10px 0; color: var(--secondary)">1.02 mm</p>
+            <p>The maximum displacement recorded during welding was 1.02 mm and it occurred at Arc Stop[cite: 2]. As heat accumulated during welding, the material expanded continuously, causing displacement to increase[cite: 2]. The maximum displacement occurred immediately before the cooling process started[cite: 2].</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // FUNGSI UNTUK EXPAND/COLLAPSE INFO PANEL
+    function toggleInfo() {
+        const panel = document.getElementById('infoPanel');
+        const icon = document.getElementById('infoIcon');
+        if (panel.classList.contains('show')) {
+            panel.classList.remove('show');
+            icon.textContent = '➕';
+        } else {
+            panel.classList.add('show');
+            icon.textContent = '➖';
+        }
+    }
+
+    // --- DATA TABLE 1 (ELECTRICAL) ---
+    const rawData = [
+        [185.2, 24.8, 4592.96, 1.722, 0.134, 50.72], [192.6, 25.1, 4834.26, 1.813, 0.13, 50.42], [178.4, 24.2, 4317.28, 1.619, 0.136, 51.32],
+        [205.8, 25.9, 5330.22, 1.999, 0.126, 49.62], [168.3, 23.7, 3988.71, 1.496, 0.141, 51.82], [195.2, 25.3, 4938.56, 1.852, 0.13, 50.22],
+        [210.4, 26.1, 5491.44, 2.059, 0.124, 49.42], [182.7, 24.5, 4476.15, 1.679, 0.134, 51.02], [220.1, 26.7, 5876.67, 2.204, 0.121, 48.82],
+        [188.5, 24.7, 4655.95, 1.746, 0.131, 50.82], [215.3, 26.5, 5705.45, 2.14, 0.123, 49.02], [175.2, 23.9, 4187.28, 1.57, 0.136, 51.62],
+        [200.6, 25.6, 5135.36, 1.926, 0.128, 49.92], [165.8, 23.4, 3879.72, 1.455, 0.141, 52.12], [225.4, 27, 6085.8, 2.282, 0.12, 48.52],
+        [212.5, 26.3, 5588.75, 2.096, 0.124, 49.22], [198.3, 25.4, 5036.82, 1.889, 0.128, 50.12], [225.7, 27.1, 6116.47, 2.294, 0.12, 48.42],
+        [189.6, 24.9, 4721.04, 1.77, 0.131, 50.62], [235.2, 28, 6585.6, 2.47, 0.119, 47.52], [175.8, 24, 4219.2, 1.582, 0.137, 51.52],
+        [220.4, 26.8, 5906.72, 2.215, 0.122, 48.72], [195.5, 25.3, 4946.15, 1.855, 0.129, 50.22], [208.9, 26, 5431.4, 2.037, 0.124, 49.52],
+        [170.2, 23.8, 4050.76, 1.519, 0.14, 51.72], [230.8, 27.5, 6347, 2.38, 0.119, 48.02], [185.9, 24.8, 4610.32, 1.729, 0.133, 50.72],
+        [218.3, 26.6, 5806.78, 2.178, 0.122, 48.92], [195, 25.2, 4914, 1.843, 0.129, 50.32], [210.1, 26.2, 5504.62, 2.064, 0.125, 49.32]
+    ];
+
+    const tableBody = document.querySelector('#dataTable tbody');
+    let plotA_data = [], plotB_data = [], plotC_data = [];
+
+    rawData.forEach((row, index) => {
+        tableBody.innerHTML += `<tr><td>${index + 1}</td><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td><td>${row[4]}</td><td>${row[5]}</td></tr>`;
+        plotA_data.push({ x: row[1], y: row[0] }); 
+        plotB_data.push({ x: row[1], y: row[2] }); 
+        plotC_data.push({ x: row[1], y: row[3] }); 
+    });
+
+    const commonScatterOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+
+    // --- INITIALIZE SCATTER CHARTS ---
+    new Chart(document.getElementById('plotA'), { type: 'scatter', data: { datasets: [{ data: plotA_data, backgroundColor: '#2b6cb0' }] }, options: { ...commonScatterOptions, scales: { x: { title: { display: true, text: 'Voltage (V)' } }, y: { title: { display: true, text: 'Current (A)' } } } } });
+    new Chart(document.getElementById('plotB'), { type: 'scatter', data: { datasets: [{ data: plotB_data, backgroundColor: '#e53e3e' }] }, options: { ...commonScatterOptions, scales: { x: { title: { display: true, text: 'Voltage (V)' } }, y: { title: { display: true, text: 'Power (W)' } } } } });
+    new Chart(document.getElementById('plotC'), { type: 'scatter', data: { datasets: [{ data: plotC_data, backgroundColor: '#38a169' }] }, options: { ...commonScatterOptions, scales: { x: { title: { display: true, text: 'Voltage (V)' } }, y: { title: { display: true, text: 'Heat Input (kJ/mm)' } } } } });
+
+    // --- DATA SPC CHART (THERMAL) ---
+    const spcLabels = Array.from({length: 25}, (_, i) => `Sample ${i + 1}`);
+    const tempMeans = [486.25, 511, 470.25, 534.25, 449.37, 498.92, 520.32, 476.25, 506.25, 461.78, 527.62, 491.75, 517.63, 457.58, 509.9, 482.52, 533.12, 467.6, 502.62, 541.78, 477.6, 520.1, 452.55, 497.62, 530.1];
+    
+    // Limits
+    const grandMeanData = Array(25).fill(496.99);
+    const uclData = Array(25).fill(501.25);
+    const lclData = Array(25).fill(492.73);
+
+    new Chart(document.getElementById('spcChart'), {
+        type: 'line',
+        data: {
+            labels: spcLabels,
+            datasets: [
+                {
+                    label: 'Mean (X-bar) Temp °C',
+                    data: tempMeans,
+                    borderColor: '#1a365d',
+                    backgroundColor: '#1a365d',
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointBackgroundColor: tempMeans.map(val => (val > 501.25 || val < 492.73) ? '#e53e3e' : '#1a365d') // Highlight out of bounds points
+                },
+                {
+                    label: 'UCL (501.25)',
+                    data: uclData,
+                    borderColor: '#e53e3e',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointRadius: 0
+                },
+                {
+                    label: 'LCL (492.73)',
+                    data: lclData,
+                    borderColor: '#e53e3e',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointRadius: 0
+                },
+                {
+                    label: 'Grand Mean (496.99)',
+                    data: grandMeanData,
+                    borderColor: '#38a169',
+                    borderWidth: 2,
+                    pointRadius: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { title: { display: true, text: 'Temperature (°C)', font: {weight: 'bold'} } },
+                x: { title: { display: true, text: 'Sample Number', font: {weight: 'bold'} } }
+            },
+            plugins: {
+                legend: { position: 'top' }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
