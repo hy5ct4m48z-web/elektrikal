@@ -1,2 +1,0 @@
-# elektrikal
-data data gmaw
