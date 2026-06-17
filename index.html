@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BMIK 2124: GMAW Quality Monitoring Dashboard</title>
+    <title>BMIK 2124: GMAW Quality Monitoring</title>
+    <!-- Memuatkan Chart.js untuk graf interaktif -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -59,6 +60,7 @@
         .info-banner h3 { margin: 0 0 15px 0; font-size: 18px; color: var(--accent); font-weight: 500; }
         .info-banner p { margin: 0; font-size: 16px; color: #93c5fd; font-weight: bold; }
         .info-banner .supervisor-name { color: white; font-size: 18px; display: block; margin-top: 5px;}
+        .info-banner .project-date { display: block; color: var(--accent); margin-top: 10px; font-size: 15px; }
 
         /* --- MAIN CONTENT AREA --- */
         .main-container { padding: 30px; max-width: 1400px; margin: 0 auto; }
@@ -109,20 +111,25 @@
 </head>
 <body>
 
+    <!-- TOP NAVBAR -->
     <div class="navbar">
-        <h1>Dashboard System</h1>
+        <h1></h1>
         <div class="date">Update: 19/06/2026</div>
     </div>
 
+    <!-- PROJECT INFO BANNER (Menggantikan KPI) -->
     <div class="info-banner">
         <h2>GMAW Real-Time Quality Monitoring System</h2>
         <h3>Course: BMIK 2124 | Electrical Welding Equipment</h3>
         <p>Project Supervisor:</p>
         <span class="supervisor-name">Ts. Mohammad Khalid Bin Wahid</span>
+        <span class="project-date">Date: 19/06/2026</span>
     </div>
 
+    <!-- MAIN SCROLLABLE CONTENT AREA -->
     <div class="main-container">
 
+        <!-- 1. TEAM & EQUIPMENT -->
         <div class="card" style="border-top-color: var(--secondary);">
             <h2 class="section-header">Quality Assurance Team</h2>
             <div class="grid-4">
@@ -182,6 +189,7 @@
             </div>
         </div>
 
+        <!-- 2. ELECTRICAL ANALYSIS -->
         <div class="card" style="border-top-color: #8b5cf6;">
             <h2 class="section-header">Table 1: 30 Samples Electrical Measurement Parameters</h2>
             <div class="table-responsive">
@@ -192,7 +200,7 @@
                             <th>Heat Input (kJ/mm)</th><th>Resistance (Ω)</th><th>Voltage Drop (V)</th>
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody><!-- Generated via JS --></tbody>
                 </table>
             </div>
 
@@ -217,6 +225,7 @@
             </div>
         </div>
 
+        <!-- 3. THERMAL SPC -->
         <div class="card" style="border-top-color: #ef4444;">
             <h2 class="section-header">Statistical Process Control (SPC) - Thermal Stability</h2>
             <div class="chart-container" style="height: 450px;">
@@ -246,6 +255,7 @@
             </div>
         </div>
 
+        <!-- 4. MECHANICAL ANALYSIS -->
         <div class="card" style="border-top-color: #10b981;">
             <h2 class="section-header">Table 3: Load & Displacement Reference Data</h2>
             <div class="table-responsive">
