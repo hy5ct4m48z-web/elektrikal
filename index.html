@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BMIK 2124: GMAW Quality Monitoring</title>
-    <!-- Memuatkan Chart.js untuk graf interaktif -->
+    <title>BMIK 2124: GMAW Quality Monitoring Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -28,23 +27,6 @@
             margin: 0;
             padding: 0;
         }
-
-        /* --- TOP NAVBAR --- */
-        .navbar {
-            background-color: var(--primary-dark);
-            color: white;
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .navbar h1 { margin: 0; font-size: 22px; display: flex; align-items: center; gap: 10px; }
-        .navbar .date { font-size: 14px; color: var(--text-light); background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px; }
 
         /* --- PROJECT INFO BANNER --- */
         .info-banner {
@@ -98,38 +80,34 @@
         td { padding: 12px 15px; border-bottom: 1px solid var(--accent); }
         tr:hover { background-color: #f1f5f9; }
 
+        /* Kelas Khas untuk Highlight Table */
+        .highlight-blue { background-color: #e0f2fe !important; color: #0369a1; font-weight: 500;}
+        .highlight-green { background-color: #dcfce7 !important; color: #15803d; font-weight: 500;}
+
         .chart-container { position: relative; height: 350px; width: 100%; margin-bottom: 20px; }
         
         .analysis-box { background-color: #f8fafc; border-left: 4px solid var(--secondary); padding: 15px; border-radius: 4px; font-size: 14px; line-height: 1.6; }
         .analysis-box.alert { border-left-color: var(--danger); background-color: #fef2f2; color: #991b1b; }
 
-        /* Responsive Mobile */
-        @media (max-width: 768px) {
-            .grid-2, .grid-4 { grid-template-columns: 1fr; }
-        }
+        /* Footer */
+        .footer { background: var(--primary-dark); color: white; padding: 30px; text-align: center; font-size: 14px;}
+        .footer h3 { margin-top: 0; color: var(--secondary); }
+
+        @media (max-width: 768px) { .grid-2, .grid-4 { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-    <!-- TOP NAVBAR -->
-    <div class="navbar">
-        <h1></h1>
-        <div class="date">Update: 19/06/2026</div>
-    </div>
-
-    <!-- PROJECT INFO BANNER (Menggantikan KPI) -->
     <div class="info-banner">
         <h2>GMAW Real-Time Quality Monitoring System</h2>
         <h3>Course: BMIK 2124 | Electrical Welding Equipment</h3>
         <p>Project Supervisor:</p>
         <span class="supervisor-name">Ts. Mohammad Khalid Bin Wahid</span>
-        <span class="project-date">Date: 19/06/2026</span>
+        <span class="project-date">Date: 28 April 2026</span>
     </div>
 
-    <!-- MAIN SCROLLABLE CONTENT AREA -->
     <div class="main-container">
 
-        <!-- 1. TEAM & EQUIPMENT -->
         <div class="card" style="border-top-color: var(--secondary);">
             <h2 class="section-header">Quality Assurance Team</h2>
             <div class="grid-4">
@@ -189,18 +167,22 @@
             </div>
         </div>
 
-        <!-- 2. ELECTRICAL ANALYSIS -->
         <div class="card" style="border-top-color: #8b5cf6;">
             <h2 class="section-header">Table 1: 30 Samples Electrical Measurement Parameters</h2>
             <div class="table-responsive">
-                <table id="dataTable">
+                <table id="dataTable1">
                     <thead>
                         <tr>
-                            <th>Sample</th><th>Current (A)</th><th>Voltage (V)</th><th>Power (W)</th>
-                            <th>Heat Input (kJ/mm)</th><th>Resistance (Ω)</th><th>Voltage Drop (V)</th>
+                            <th>Sample</th>
+                            <th>Current (A)</th>
+                            <th>Voltage (V)</th>
+                            <th style="background-color: #0369a1; color: white;">Power (W)</th>
+                            <th style="background-color: #15803d; color: white;">Heat Input (kJ/mm)</th>
+                            <th style="background-color: #0369a1; color: white;">Resistance (Ω)</th>
+                            <th style="background-color: #15803d; color: white;">Voltage Drop (V)</th>
                         </tr>
                     </thead>
-                    <tbody><!-- Generated via JS --></tbody>
+                    <tbody></tbody>
                 </table>
             </div>
 
@@ -225,37 +207,54 @@
             </div>
         </div>
 
-        <!-- 3. THERMAL SPC -->
         <div class="card" style="border-top-color: #ef4444;">
+            <h2 class="section-header">Table 2: Surface Temperature Measurements (25 Samples)</h2>
+            <div class="table-responsive">
+                <table id="dataTable2">
+                    <thead>
+                        <tr>
+                            <th>Sample</th><th>R1 (°C)</th><th>R2 (°C)</th><th>R3 (°C)</th><th>R4 (°C)</th><th>R5 (°C)</th><th>R6 (°C)</th>
+                            <th style="background-color: #0f172a; color: white;">Mean (X̄)</th>
+                            <th style="background-color: #b91c1c; color: white;">Range (R)</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <br>
             <h2 class="section-header">Statistical Process Control (SPC) - Thermal Stability</h2>
-            <div class="chart-container" style="height: 450px;">
+            
+            <h3 style="color: var(--primary);">1. X-Bar Chart (Temperature Means)</h3>
+            <div class="chart-container" style="height: 400px;">
                 <canvas id="spcChart"></canvas>
             </div>
             
-            <div class="grid-2" style="margin-top: 30px;">
-                <div class="analysis-box alert">
-                    <strong style="font-size: 16px;">X-Bar Chart Interpretation:</strong>
-                    <ul style="margin-top: 10px; padding-left: 15px;">
-                        <li>The vast majority of the sample means <strong>(23 points)</strong> deviate beyond the acceptable statistical thermal boundaries.</li>
-                        <li>The overall heat input across the production run is highly erratic and unpredictable due to erratic wire feed speed causing arc current fluctuations.</li>
-                        <li><strong>Corrective Action:</strong> Inspect and calibrate the wire feeder drive rolls and replace the worn contact tip.</li>
-                    </ul>
-                </div>
+            <div class="analysis-box alert" style="margin-bottom: 40px;">
+                <strong style="font-size: 16px;">X-Bar Chart Interpretation:</strong>
+                <ul style="margin-top: 10px; padding-left: 15px;">
+                    <li>The vast majority of the sample means <strong>(23 points)</strong> deviate beyond the acceptable statistical thermal boundaries.</li>
+                    <li>The overall heat input across the production run is highly erratic and unpredictable due to erratic wire feed speed causing arc current fluctuations.</li>
+                </ul>
+            </div>
 
-                <div class="analysis-box" style="background-color: #f1f5f9; border-left-color: var(--secondary);">
-                    <strong style="font-size: 16px; color: var(--secondary);">Range (R) Max-Min Temperature Reading:</strong>
-                    <p style="background: white; padding: 10px; border-radius: 4px; margin: 10px 0; border: 1px solid var(--accent); text-align: center;">
-                        <strong>Mean (R̄):</strong> 8.82 °C &nbsp;|&nbsp; <strong>UCL_R:</strong> 17.68 °C &nbsp;|&nbsp; <strong>LCL_R:</strong> 0.26 °C
-                    </p>
-                    <ul style="margin-top: 10px; padding-left: 15px;">
-                        <li><strong>0 points</strong> are above the Upper Control Limit (UCL R).</li>
-                        <li>Although the X-bar chart reveals severe inter-sample instability, the R-chart shows <strong>intra-sample stability</strong> (the sensor reads consistently within each sample grouping).</li>
-                    </ul>
-                </div>
+            <h3 style="color: var(--primary);">2. R-Chart (Range Variation) Control Limits</h3>
+            <div class="chart-container" style="height: 400px;">
+                <canvas id="rChart"></canvas>
+            </div>
+
+            <div class="analysis-box" style="background-color: #f1f5f9; border-left-color: var(--secondary);">
+                <strong style="font-size: 16px; color: var(--secondary);">Range (R) Max-Min Temperature Interpretation:</strong>
+                <p style="background: white; padding: 10px; border-radius: 4px; margin: 10px 0; border: 1px solid var(--accent); text-align: center;">
+                    <strong>Mean (R̄):</strong> 8.82 °C &nbsp;|&nbsp; <strong>UCL_R:</strong> 17.68 °C &nbsp;|&nbsp; <strong>LCL_R:</strong> 0.26 °C
+                </p>
+                <ul style="margin-top: 10px; padding-left: 15px;">
+                    <li><strong>0 points</strong> are above the Upper Control Limit (UCL R).</li>
+                    <li>Although the X-bar chart reveals severe inter-sample instability, the R-chart shows <strong>intra-sample stability</strong> (the sensor reads consistently within each sample grouping).</li>
+                </ul>
             </div>
         </div>
 
-        <!-- 4. MECHANICAL ANALYSIS -->
         <div class="card" style="border-top-color: #10b981;">
             <h2 class="section-header">Table 3: Load & Displacement Reference Data</h2>
             <div class="table-responsive">
@@ -285,14 +284,18 @@
                 <canvas id="mechChart"></canvas>
             </div>
 
-            <div class="grid-2" style="margin-top: 30px;">
+            <div class="grid-2" style="margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr 1fr;">
                 <div class="analysis-box" style="border-left-color: var(--danger);">
-                    <h3 style="color: var(--danger); margin-top: 0;">Maximum Load: 145 N</h3>
-                    <p style="font-size: 14px; color: var(--text-main); margin: 0;">The maximum load recorded was 145 N, occurring precisely at 15 seconds. This peak load is the direct result of intense localized thermal expansion, which generates high internal stress within the metal during the welding process.</p>
+                    <h3 style="color: var(--danger); margin-top: 0;">Max Load: 145 N</h3>
+                    <p style="font-size: 13px; color: var(--text-main); margin: 0;">Occurring precisely at 15 seconds. Direct result of intense localized thermal expansion, generating high internal stress within the metal.</p>
                 </div>
                 <div class="analysis-box" style="border-left-color: var(--secondary);">
-                    <h3 style="color: var(--secondary); margin-top: 0;">Max Displacement: 1.02 mm</h3>
-                    <p style="font-size: 14px; color: var(--text-main); margin: 0;">The maximum displacement recorded during welding was 1.02 mm and it occurred at Arc Stop. As heat accumulated during welding, the material expanded continuously, causing displacement to increase.</p>
+                    <h3 style="color: var(--secondary); margin-top: 0;">Max Disp: 1.02 mm</h3>
+                    <p style="font-size: 13px; color: var(--text-main); margin: 0;">Occurred at Arc Stop. As heat accumulated during welding, the material expanded continuously, causing maximum displacement before cooling started.</p>
+                </div>
+                <div class="analysis-box" style="border-left-color: var(--warning);">
+                    <h3 style="color: var(--warning); margin-top: 0;">Residual Disp: 0.48 mm</h3>
+                    <p style="font-size: 13px; color: var(--text-main); margin: 0;">Final displacement recorded at 60s. This indicates permanent plastic deformation/warpage which critically affects structural dimensional tolerances.</p>
                 </div>
             </div>
 
@@ -319,11 +322,25 @@
             </div>
         </div>
 
+        <div class="card" style="border-top-color: var(--primary-dark); background-color: #f8fafc;">
+            <h2 class="section-header" style="border-bottom-color: var(--text-light);">Summary & Recommendations</h2>
+            <ul style="font-size: 15px; line-height: 1.8; color: var(--text-main);">
+                <li><strong>Electrical Findings:</strong> The welding power and heat input exhibit a strong positive correlation with current and voltage, confirming that heat energy absorption relies directly on electrical stability.</li>
+                <li><strong>Thermal Irregularities:</strong> The SPC charts conclusively demonstrate that the thermal process is <strong>Out of Control</strong>. Inter-sample temperatures heavily violate the Upper and Lower Control Limits.</li>
+                <li><strong>Mechanical Stress:</strong> Thermal instability induced extreme peak loads (145 N) and left a permanent residual structural distortion of 0.48 mm, threatening the structural integrity of the 500 critical components.</li>
+                <li><strong style="color: var(--danger);">Corrective Action Plan:</strong> The erratic fluctuations are traced back to inconsistent wire feeding. The production line must be halted to <strong>inspect and calibrate the wire feeder drive rolls and replace the worn contact tip</strong>.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        <h3>References</h3>
+        <p>Wahid, M. K., & Zaimi, M. (2026). <em>Electrical Welding Equipment (BMIK 2124) - Assignment 2026</em>. Fakulti Teknologi dan Kejuruteraan Industri dan Pembuatan, Universiti Teknikal Malaysia Melaka.</p>
     </div>
 
 <script>
     // --- DATA TABLE 1 (ELECTRICAL) ---
-    const rawData = [
+    const rawData1 = [
         [185.2, 24.8, 4592.96, 1.722, 0.134, 50.72], [192.6, 25.1, 4834.26, 1.813, 0.13, 50.42], [178.4, 24.2, 4317.28, 1.619, 0.136, 51.32],
         [205.8, 25.9, 5330.22, 1.999, 0.126, 49.62], [168.3, 23.7, 3988.71, 1.496, 0.141, 51.82], [195.2, 25.3, 4938.56, 1.852, 0.13, 50.22],
         [210.4, 26.1, 5491.44, 2.059, 0.124, 49.42], [182.7, 24.5, 4476.15, 1.679, 0.134, 51.02], [220.1, 26.7, 5876.67, 2.204, 0.121, 48.82],
@@ -336,14 +353,50 @@
         [218.3, 26.6, 5806.78, 2.178, 0.122, 48.92], [195, 25.2, 4914, 1.843, 0.129, 50.32], [210.1, 26.2, 5504.62, 2.064, 0.125, 49.32]
     ];
 
-    const tableBody = document.querySelector('#dataTable tbody');
+    const tableBody1 = document.querySelector('#dataTable1 tbody');
     let plotA_data = [], plotB_data = [], plotC_data = [];
 
-    rawData.forEach((row, index) => {
-        tableBody.innerHTML += `<tr><td>${index + 1}</td><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td><td>${row[4]}</td><td>${row[5]}</td></tr>`;
+    rawData1.forEach((row, index) => {
+        const highlightClass = index % 2 === 0 ? 'highlight-blue' : 'highlight-green';
+        tableBody1.innerHTML += `<tr>
+            <td>${index + 1}</td>
+            <td>${row[0]}</td>
+            <td>${row[1]}</td>
+            <td class="${highlightClass}">${row[2]}</td>
+            <td class="${highlightClass}">${row[3]}</td>
+            <td class="${highlightClass}">${row[4]}</td>
+            <td class="${highlightClass}">${row[5]}</td>
+        </tr>`;
         plotA_data.push({ x: row[1], y: row[0] }); 
         plotB_data.push({ x: row[1], y: row[2] }); 
         plotC_data.push({ x: row[1], y: row[3] }); 
+    });
+
+    // --- DATA TABLE 2 (THERMAL RAW) ---
+    const rawData2 = [
+        [485.3,492.1,478.6,490.2,487.5,483.8, 486.25, 13.5], [512.6,508.3,515.2,505.8,510.4,513.7, 511.00, 9.4],
+        [468.2,472.5,465.8,470.1,475.3,469.6, 470.25, 9.5], [535.4,528.7,540.2,532.6,538.1,530.5, 534.25, 11.5],
+        [445.8,452.3,448.6,450.2,447.5,451.8, 449.37, 6.5], [498.5,502.1,495.6,500.3,497.8,499.2, 498.92, 6.5],
+        [520.3,518.6,525.1,515.8,522.4,519.7, 520.32, 9.3], [475.6,480.2,472.8,478.5,476.1,474.3, 476.25, 7.4],
+        [505.2,508.7,502.4,510.3,506.8,504.1, 506.25, 7.9], [460.5,465.2,458.8,462.5,464.1,459.6, 461.78, 6.4],
+        [525.8,530.4,522.6,528.3,532.1,526.5, 527.62, 9.5], [490.2,488.5,495.1,492.6,489.8,494.3, 491.75, 6.6],
+        [515.6,520.3,512.8,518.2,522.5,516.4, 517.63, 9.7], [455.3,460.5,452.8,458.6,462.1,456.2, 457.58, 9.3],
+        [508.4,512.6,505.8,510.2,514.5,507.9, 509.90, 8.7], [480.5,485.2,478.6,482.4,487.1,481.3, 482.52, 8.5],
+        [530.2,535.6,528.4,532.8,538.2,533.5, 533.12, 9.8], [465.8,470.5,462.4,468.2,472.6,466.1, 467.60, 10.2],
+        [500.6,505.2,498.4,502.8,507.5,501.2, 502.62, 9.1], [542.5,538.2,545.8,540.6,544.1,539.5, 541.78, 7.6],
+        [475.2,480.5,472.8,478.6,482.1,476.4, 477.60, 9.3], [518.6,522.4,515.8,520.2,524.5,519.1, 520.10, 8.7],
+        [450.8,455.6,448.5,452.8,456.2,451.4, 452.55, 7.7], [495.5,500.2,492.8,498.4,502.1,496.7, 497.62, 9.3],
+        [528.4,532.6,525.8,530.2,534.5,529.1, 530.10, 8.7]
+    ];
+
+    const tableBody2 = document.querySelector('#dataTable2 tbody');
+    rawData2.forEach((row, index) => {
+        tableBody2.innerHTML += `<tr>
+            <td>${index + 1}</td>
+            <td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td><td>${row[4]}</td><td>${row[5]}</td>
+            <td style="font-weight:bold; color: #0f172a; background-color: #f1f5f9;">${row[6]}</td>
+            <td style="font-weight:bold; color: #b91c1c; background-color: #fef2f2;">${row[7]}</td>
+        </tr>`;
     });
 
     const commonScatterOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
@@ -353,11 +406,9 @@
     new Chart(document.getElementById('plotB'), { type: 'scatter', data: { datasets: [{ data: plotB_data, backgroundColor: '#ef4444' }] }, options: { ...commonScatterOptions, scales: { x: { title: { display: true, text: 'Voltage (V)' } }, y: { title: { display: true, text: 'Power (W)' } } } } });
     new Chart(document.getElementById('plotC'), { type: 'scatter', data: { datasets: [{ data: plotC_data, backgroundColor: '#10b981' }] }, options: { ...commonScatterOptions, scales: { x: { title: { display: true, text: 'Voltage (V)' } }, y: { title: { display: true, text: 'Heat Input (kJ/mm)' } } } } });
 
-    // --- DATA SPC CHART (THERMAL) ---
+    // --- DATA SPC CHART (THERMAL X-BAR) ---
     const spcLabels = Array.from({length: 25}, (_, i) => `Sample ${i + 1}`);
-    const tempMeans = [486.25, 511, 470.25, 534.25, 449.37, 498.92, 520.32, 476.25, 506.25, 461.78, 527.62, 491.75, 517.63, 457.58, 509.9, 482.52, 533.12, 467.6, 502.62, 541.78, 477.6, 520.1, 452.55, 497.62, 530.1];
-    
-    // Limits
+    const tempMeans = rawData2.map(row => row[6]);
     const grandMeanData = Array(25).fill(496.99);
     const uclData = Array(25).fill(501.25);
     const lclData = Array(25).fill(492.73);
@@ -384,6 +435,38 @@
         options: {
             responsive: true, maintainAspectRatio: false,
             scales: { y: { title: { display: true, text: 'Temperature (°C)' } }, x: { title: { display: true, text: 'Sample Number' } } },
+            plugins: { legend: { position: 'top' } }
+        }
+    });
+
+    // --- DATA SPC CHART (THERMAL R-CHART) ---
+    const rangeData = rawData2.map(row => row[7]);
+    const rBarData = Array(25).fill(8.82);
+    const uclRData = Array(25).fill(17.68);
+    const lclRData = Array(25).fill(0.26);
+
+    new Chart(document.getElementById('rChart'), {
+        type: 'line',
+        data: {
+            labels: spcLabels,
+            datasets: [
+                {
+                    label: 'Range (R) Temp °C',
+                    data: rangeData,
+                    borderColor: '#f59e0b',
+                    backgroundColor: '#f59e0b',
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointBackgroundColor: rangeData.map(val => (val > 17.68 || val < 0.26) ? '#ef4444' : '#f59e0b')
+                },
+                { label: 'UCL (17.68)', data: uclRData, borderColor: '#ef4444', borderWidth: 2, borderDash: [5, 5], pointRadius: 0 },
+                { label: 'LCL (0.26)', data: lclRData, borderColor: '#ef4444', borderWidth: 2, borderDash: [5, 5], pointRadius: 0 },
+                { label: 'Mean Range (8.82)', data: rBarData, borderColor: '#3b82f6', borderWidth: 2, pointRadius: 0 }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: { y: { title: { display: true, text: 'Temperature Range (°C)' } }, x: { title: { display: true, text: 'Sample Number' } } },
             plugins: { legend: { position: 'top' } }
         }
     });
